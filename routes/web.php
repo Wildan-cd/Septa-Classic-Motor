@@ -3,12 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AboutController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
+use App\Http\Controllers\Admin\DashboardController;
 
 // Home Page
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -25,3 +20,6 @@ Route::get('/catalog', function () {
 Route::get('/order-status', function () {
     return view('order-status');
 })->name('order-status');
+
+// Admin
+Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');

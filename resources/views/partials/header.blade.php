@@ -7,10 +7,10 @@
             </div>
             
             <nav class="nav">
-                <a href="{{ route('home') }}" class="nav-link active">Home</a>
-                <a href="{{ route('catalog') }}" class="nav-link">Catalog</a>
-                <a href="{{ route('about') }}" class="nav-link">About</a>
-                <a href="{{ route('order-status') }}" class="nav-link">Order Status</a>
+                <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
+                <a href="{{ route('catalog') }}" class="nav-link {{ request()->routeIs('catalog') ? 'active' : '' }}">Catalog</a>
+                <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">About</a>
+                <a href="{{ route('order-status') }}" class="nav-link {{ request()->routeIs('order-status') ? 'active' : '' }}">Order Status</a>
             </nav>
             
             <div class="header-actions">
