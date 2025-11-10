@@ -176,10 +176,12 @@ body {
 /* Hero Section */
 .hero {
     position: relative;
-    height: 600px;
+    height: 657px;
     background: url('/images/hero-bg.jpg') center/cover no-repeat;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    padding-right: 480px;
     color: var(--white);
 }
 
