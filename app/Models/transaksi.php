@@ -9,7 +9,7 @@ class Transaksi extends Model
     protected $table = 'transaksi';
     protected $primaryKey = 'id_transaksi';
     public $timestamps = false;
-
+    
     protected $fillable = [
         'id_pelanggan',
         'tgl_transaksi',
@@ -18,15 +18,25 @@ class Transaksi extends Model
         'ongkir',
         'total_harga'
     ];
-
+    
+    protected $casts = [
+        'tgl_transaksi' => 'date',
+        'ongkir' => 'decimal:2',
+        'total_harga' => 'decimal:2'
+    ];
+    
     public function pelanggan()
     {
-        return $this->belongsTo(pelanggan::class, 'id_pelanggan');
+        return $this->belongsTo(Pelanggan::class, 'id_pelanggan', 'id_pelanggan');
     }
-
-    public function detail()
+    
+    public function detailTransaksi()
     {
-        return $this->hasMany(detail_transaksi::class, 'id_transaksi');
+        return $this->hasMany(DetailTransaksi::class, 'id_transaksi', 'id_transaksi');
+    }
+    
+    public function pengiriman()
+    {
+        return $this->hasOne(Pengiriman::class, 'id_transaksi', 'id_transaksi');
     }
 }
-

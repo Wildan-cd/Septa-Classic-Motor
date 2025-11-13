@@ -1,32 +1,93 @@
-// Mobile Menu Toggle
-// const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-// const nav = document.querySelector('.nav');
-
-// if (mobileMenuBtn) {
-//     mobileMenuBtn.addEventListener('click', () => {
-//         nav.classList.toggle('active');
-//         mobileMenuBtn.classList.toggle('active');
-//     });
-// }
-
-mobileMenuBtn.addEventListener('click', function(e) {
-    e.preventDefault();        // Prevent default behavior
-    e.stopPropagation();      // Stop event bubbling
+// Active Navigation Handler
+document.addEventListener('DOMContentLoaded', function() {
+    // Get current page URL
+    const currentUrl = window.location.pathname;
     
-    nav.classList.toggle('active');
-    mobileMenuBtn.classList.toggle('active');
+    // Get all nav links
+    const navLinks = document.querySelectorAll('.nav-link');
     
-    // Handle body scroll
-    if (nav.classList.contains('active')) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = '';
-    }
+    // Remove active class from all links first
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        
+        // Get link href
+        const linkHref = link.getAttribute('href');
+        
+        // Check if current URL matches link href
+        if (currentUrl === linkHref || 
+            (linkHref !== '/' && currentUrl.startsWith(linkHref))) {
+            link.classList.add('active');
+        }
+        
+        // Special case for home page
+        if (currentUrl === '/' && linkHref === '/') {
+            link.classList.add('active');
+        }
+    });
 });
 
+// Mobile Menu Toggle - FIXED
+const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+const nav = document.querySelector('.nav');
 
-
-
+if (mobileMenuBtn && nav) {
+    // Toggle menu on button click
+    mobileMenuBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        nav.classList.toggle('active');
+        mobileMenuBtn.classList.toggle('active');
+        
+        // Prevent body scroll when menu is open
+        if (nav.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Close menu when clicking on a nav link (mobile)
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                nav.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+    
+    // Close menu when clicking outside (only on mobile)
+    document.addEventListener('click', (event) => {
+        if (window.innerWidth <= 768) {
+            const isClickInsideNav = nav.contains(event.target);
+            const isClickOnButton = mobileMenuBtn.contains(event.target);
+            
+            if (!isClickInsideNav && !isClickOnButton && nav.classList.contains('active')) {
+                nav.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+    });
+    
+    // Reset menu state on window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            if (window.innerWidth > 768) {
+                // Desktop mode: remove mobile menu states
+                nav.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                document.body.style.overflow = '';
+                nav.style.display = '';
+            }
+        }, 250);
+    });
+}
 
 // Search Functionality
 const searchBtn = document.querySelector('.search-btn');
@@ -137,22 +198,6 @@ document.querySelectorAll('.product-card').forEach(card => {
         if (!e.target.classList.contains('add-to-cart-btn')) {
             // Navigate to product detail
             // window.location.href = `/product/${card.dataset.productId}`;
-        }
-    });
-});
-
-// Active Navbar
-document.addEventListener('DOMContentLoaded', function() {
-    const currentUrl = window.location.pathname;
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    navLinks.forEach(link => {
-        const linkHref = link.getAttribute('href');
-        
-        // Check if current URL matches
-        if (currentUrl === linkHref || 
-            (linkHref !== '/' && currentUrl.startsWith(linkHref))) {
-            link.classList.add('active');
         }
     });
 });
