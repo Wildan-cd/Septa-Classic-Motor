@@ -32,7 +32,7 @@
                 <a href="{{ route('admin.profile') }}" class="dropdown-item">Profile</a>
                 <a href="{{ route('admin.settings') }}" class="dropdown-item">Settings</a>
                 <hr>
-                <form action="" method="">
+                <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" class="dropdown-item logout">Logout</button>
                 </form>

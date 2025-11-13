@@ -38,11 +38,11 @@ class DatabaseSeeder extends Seeder
 
         // Create Products
         $produk = [
-            ['nama_produk' => 'Lampu Depan CB100', 'jenis' => 'Lampu Depan', 'harga' => 126500, 'stok' => 15, 'keterangan' => 'Lampu depan original untuk Honda CB100'],
-            ['nama_produk' => 'Spakbor Depan CB125', 'jenis' => 'Spakbor', 'harga' => 85000, 'stok' => 20, 'keterangan' => 'Spakbor depan custom untuk CB125'],
-            ['nama_produk' => 'Sein CB Series', 'jenis' => 'Sein', 'harga' => 45000, 'stok' => 30, 'keterangan' => 'Sein universal CB series'],
-            ['nama_produk' => 'Handle Custom', 'jenis' => 'Other', 'harga' => 150000, 'stok' => 10, 'keterangan' => 'Handle stang custom chrome'],
-            ['nama_produk' => 'Jok Kulit Custom', 'jenis' => 'Other', 'harga' => 350000, 'stok' => 8, 'keterangan' => 'Jok kulit custom model cafe racer'],
+            ['nama_produk' => 'Lampu Depan CB100', 'kategori' => 'Lampu Depan', 'harga' => 126500, 'stok' => 15, 'keterangan' => 'Lampu depan original untuk Honda CB100'],
+            ['nama_produk' => 'Spakbor Depan CB125', 'kategori' => 'Spakbor', 'harga' => 85000, 'stok' => 20, 'keterangan' => 'Spakbor depan custom untuk CB125'],
+            ['nama_produk' => 'Sein CB Series', 'kategori' => 'Sein', 'harga' => 45000, 'stok' => 30, 'keterangan' => 'Sein universal CB series'],
+            ['nama_produk' => 'Handle Custom', 'kategori' => 'Other', 'harga' => 150000, 'stok' => 10, 'keterangan' => 'Handle stang custom chrome'],
+            ['nama_produk' => 'Jok Kulit Custom', 'kategori' => 'Other', 'harga' => 350000, 'stok' => 8, 'keterangan' => 'Jok kulit custom model cafe racer'],
         ];
 
         foreach ($produk as $product) {
@@ -68,9 +68,8 @@ class DatabaseSeeder extends Seeder
             Carbon::create(2023, 12, 1), // December
         ];
         
-        $statuses = ['Diproses', 'Dikirim', 'Selesai', 'Dibatalkan'];
-        $paymentStatuses = ['Pending', 'Lunas', 'Batal'];
-        $paymentMethods = ['Transfer Bank', 'COD', 'E-Wallet'];
+        $statuses = ['Diproses', 'Dikirim', 'Selesai'];
+        $paymentStatuses = ['Pending', 'Lunas'];
         
         $id_transaksi = 1;
         
@@ -83,12 +82,10 @@ class DatabaseSeeder extends Seeder
                 $date = $month->copy()->addDays(rand(0, 28))->format('Y-m-d');
                 
                 // Payment status
-                $paymentStatus = $paymentStatuses[rand(0, 2)];
+                $paymentStatus = $paymentStatuses[array_rand($paymentStatuses)];
                 
                 // Shipping status based on payment
-                if ($paymentStatus === 'Batal') {
-                    $shippingStatus = 'Dibatalkan';
-                } elseif ($paymentStatus === 'Pending') {
+                if ($paymentStatus === 'Pending') {
                     $shippingStatus = 'Diproses';
                 } else {
                     $shippingStatus = $statuses[rand(0, 2)]; // Lunas bisa Diproses, Dikirim, atau Selesai
@@ -103,7 +100,6 @@ class DatabaseSeeder extends Seeder
                 DB::table('transaksi')->insert([
                     'id_pelanggan' => $customerId,
                     'tgl_transaksi' => $date,
-                    'metode_pembayaran' => $paymentMethods[rand(0, 2)],
                     'status_pembayaran' => $paymentStatus,
                     'ongkir' => $ongkir,
                     'total_harga' => 0, // Will update after detail
