@@ -1,0 +1,133 @@
+
+h2 {
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* LEFT PANEL */
+.left-section {
+    background: #fafafa;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+.section-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin: 18px 0 10px 0;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.input-group textarea {
+    resize: none;
+    height: 85px;
+}
+
+/* RIGHT PANEL */
+.right-section {
+    background: #fafafa;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+.item-box {
+    background: white;
+    border-radius: 14px;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: 60px auto auto;
+    align-items: start;
+    margin-bottom: 18px;
+    gap: 15px;
+}
+
+.item-img {
+    width: 60px;
+    height: 60px;
+    background: #e5e5e5;
+    border-radius: 10px;
+}
+
+.item-info {
+    font-size: 14px;
+}
+
+.item-info small {
+    color: #666;
+    font-size: 12px;
+}
+
+.item-price {
+    text-align: right;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Notes under qty */
+.notes-box {
+    grid-column: 1 / 4;
+    margin-top: 8px;
+}
+
+.notes-box textarea {
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 8px;
+    resize: none;
+    font-size: 13px;
+    height: 70px;
+}
+
+/* Totals */
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.btn-order {
+    margin-top: 25px;
+    width: 100%;
+    padding: 14px;
+    background: #000;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-order:hover {
+    opacity: 0.9;
+}

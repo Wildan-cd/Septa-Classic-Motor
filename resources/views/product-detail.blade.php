@@ -114,7 +114,7 @@
                     
                     <p><strong>Spesifikasi:</strong></p>
                     <ul class="specs-list">
-                        <li><strong>Jenis:</strong> {{ $product->jenis }}</li>
+                        <li><strong>Kategori:</strong> {{ $product->Kategori }}</li>
                         <li><strong>Harga:</strong> Rp. {{ number_format($product->harga, 0, ',', '.') }}</li>
                         <li><strong>Stok:</strong> {{ $product->stok }} unit</li>
                         <li><strong>Bahan:</strong> High Quality Material</li>
@@ -198,11 +198,50 @@
     }
     
     function addToCart(productId) {
-        const qty = document.getElementById('productQty').value;
-        alert(`Added ${qty} item(s) to cart!`);
-        
-        // TODO: Implement actual add to cart logic
-        // You can add AJAX call here to add item to cart
+        fetch("{{ route('cart.add') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                id_produk: productId,
+                qty: 1
+            })
+        })
+        .then(response => {
+            if (response.status === 401) {
+                // Unauthorized - belum login
+                return response.json().then(data => {
+                    alert(data.message);
+                    window.location.href = data.redirect;
+                    throw new Error('Unauthorized');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if(data.status === 'success') {
+                alert(data.message);
+                // Update cart count jika ada
+                updateCartCount(data.cart_count);
+            } else if(data.status === 'error') {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if(error.message !== 'Unauthorized') {
+                alert('Terjadi kesalahan!');
+            }
+        });
+    }
+
+    function updateCartCount(count) {
+        const cartBadge = document.querySelector('.cart-count');
+        if(cartBadge) {
+            cartBadge.textContent = count;
+        }
     }
     
     function openTab(evt, tabName) {

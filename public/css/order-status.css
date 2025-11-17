@@ -1,0 +1,115 @@
+.breadcrumb-section {
+    background: #f8f8f8;
+    padding: 20px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.breadcrumb-item {
+    color: var(--text-light);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.breadcrumb-item:hover {
+    color: var(--primary-color);
+}
+
+.breadcrumb-item.active {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.breadcrumb-separator {
+    color: var(--text-light);
+}
+
+
+h2 {
+    font-size: 22px;
+    font-weight: 600;
+} 
+.tabs {
+    display: flex;
+    gap: 25px;
+    border-bottom: 1px solid #ddd;
+    margin-top: 20px;
+}
+.tab {
+    padding: 10px 0;
+    cursor: pointer;
+    font-size: 14px;
+}
+.tab.active {
+    border-bottom: 2px solid black;
+    font-weight: 500;
+}
+.order-card {
+    background: #fafafa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.order-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 13px;
+    line-height: 26px;
+}
+.badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: white;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.completed { background: #00c853; }
+.ondeliver { background: #ff9800; }
+
+.product-box {
+    display: flex;
+    background: white;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+.product-img {
+    width: 55px;
+    height: 55px;
+    background: #e5e5e5;
+    border-radius: 8px;
+    margin-right: 10px;
+}
+.product-info {
+    font-size: 13px;
+    line-height: 18px;
+}
+.bottom-bar {
+    background: #e0e0e0;
+    padding: 10px;
+    border-radius: 0 0 10px 10px;
+    margin-top: 10px;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.detail-btn {
+    padding: 6px 20px;
+    background: #000;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 12px;
+}
