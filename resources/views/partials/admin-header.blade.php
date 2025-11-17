@@ -9,7 +9,7 @@
             <a href="{{ route('admin.dashboard') }}" class="admin-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 Dashboard
             </a>
-            <a href="{{ route('admin.catalog') }}" class="admin-nav-link {{ request()->routeIs('admin.catalog') ? 'active' : '' }}">
+            <a href="{{ route('admin.catalog.index') }}" class="admin-nav-link {{ request()->routeIs('admin.catalog.index') ? 'active' : '' }}">
                 Catalog
             </a>
             <a href="{{ route('admin.orders') }}" class="admin-nav-link {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
@@ -29,9 +29,6 @@
                 </svg>
             </div>
             <div class="admin-dropdown">
-                <a href="{{ route('admin.profile') }}" class="dropdown-item">Profile</a>
-                <a href="{{ route('admin.settings') }}" class="dropdown-item">Settings</a>
-                <hr>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" class="dropdown-item logout">Logout</button>

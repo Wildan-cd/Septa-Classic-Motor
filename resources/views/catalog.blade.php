@@ -136,11 +136,11 @@
                 @if($products->count() > 0)
                 <div class="products-grid">
                     @foreach($products as $product)
-                    <a href="{{ route('product.detail') }}" class="product-card-link">
+                    <a href="{{ route('product.detail', ['id' => $product->id_produk]) }}" class="product-card-link">
                         <div class="product-card">
                             <div class="product-image">
                                 @if($product->gambar)
-                                <img src="{{ asset('storage/' . $product->gambar) }}" alt="{{ $product->nama_produk }}">
+                                <img src="{{ asset($product->gambar) }}" alt="{{ $product->nama_produk }}">
                                 @else
                                 <img src="{{ asset('images/placeholder.jpg') }}" alt="{{ $product->nama_produk }}">
                                 @endif
@@ -152,7 +152,7 @@
                                 @endif
                             </div>
                             <div class="product-info">
-                                <div class="product-category">{{ $product->jenis }}</div>
+                                <div class="product-category">{{ $product->Kategori }}</div>
                                 <h3 class="product-name">{{ $product->nama_produk }}</h3>
                                 <p class="product-description">{{ Str::limit($product->keterangan, 60) }}</p>
                                 <div class="product-footer">

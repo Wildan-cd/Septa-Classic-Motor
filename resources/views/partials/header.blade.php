@@ -32,7 +32,7 @@
                     </button>
                 </div>
                 
-                <a href="#" class="icon-btn cart-btn">
+                <a href="{{ route('cart.index') }}" class="icon-btn cart-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="9" cy="21" r="1"></circle>
                         <circle cx="20" cy="21" r="1"></circle>
