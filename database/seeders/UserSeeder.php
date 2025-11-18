@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 class UserSeeder extends Seeder
@@ -14,7 +15,16 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Clear existing users
+        Schema::disableForeignKeyConstraints();
+
         DB::table('users')->truncate();
+
+        Schema::enableForeignKeyConstraints();
+
+        // isi data
+        DB::table('users')->insert([
+            // ...
+        ]);
         
         // Create Admin User
         DB::table('users')->insert([

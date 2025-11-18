@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Produk;
+use App\Models\Cart;
 use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
@@ -19,74 +20,42 @@ class CartController extends Controller
     }
 
     // Add to cart
-    public function add(Request $request)
-    {
-        // Cek login
-        if (!Auth::check()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Silakan login terlebih dahulu!'
-            ], 401);
-        }
+public function add(Request $request)
+{
+    $productId = $request->product_id;
+    $quantity  = $request->quantity ?? 1;
 
-        try {
-            // Validasi request
-            $validated = $request->validate([
-                'id_produk' => 'required|integer',
-                'qty' => 'nullable|integer|min:1'
-            ]);
+    // CARI PRODUK
+    $product = Produk::findOrFail($productId);
 
-            $productId = $validated['id_produk'];
-            $qty = $validated['qty'] ?? 1;
+    // USER LOGIN ATAU GUEST?
+    $userId     = auth::check() ? auth::id() : null;
+    $sessionId  = session()->getId();
 
-            // Cari produk
-            $product = Produk::find($productId);
-            
-            if (!$product) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Produk tidak ditemukan!'
-                ], 404);
-            }
+    // CARI APAKAH SUDAH ADA DI CART
+    $existing = cart::where('product_id', $productId)
+                    ->when($userId, fn($q) => $q->where('user_id', $userId))
+                    ->when(!$userId, fn($q) => $q->where('session_id', $sessionId))
+                    ->first();
 
-            // Ambil cart berdasarkan user yang login
-            $userId = Auth::id();
-            $cart = session()->get("cart_{$userId}", []);
-
-            if (isset($cart[$productId])) {
-                $cart[$productId]['qty'] += $qty;
-            } else {
-                $cart[$productId] = [
-                    'id_produk' => $product->id_produk,
-                    'nama'      => $product->nama_produk,
-                    'harga'     => $product->harga,
-                    'qty'       => $qty,
-                    'gambar'    => $product->gambar ?? null,
-                ];
-            }
-
-            session()->put("cart_{$userId}", $cart);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Produk berhasil ditambahkan ke keranjang!',
-                'cart_count' => count($cart)
-            ]);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validasi gagal!',
-                'errors' => $e->errors()
-            ], 422);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+    if ($existing) {
+        // UPDATE QUANTITY
+        $existing->update([
+            'quantity' => $existing->quantity + $quantity
+        ]);
+    } else {
+        // INSERT BARU
+        Cart::create([
+            'user_id' => $userId,
+            'product_id' => $productId,
+            'quantity' => $quantity,
+            'price' => $product->price,
+        ]);
     }
+
+    return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang!');
+}
+
     // Update qty
     public function update(Request $request)
     {

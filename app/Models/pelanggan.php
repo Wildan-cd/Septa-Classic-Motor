@@ -11,14 +11,17 @@ class Pelanggan extends Model
     public $timestamps = false;
     
     protected $fillable = [
-        'nama',
-        'no_telp',
-        'alamat_lengkap'
+        'nama_pelanggan',
+        'email',
+        'no_telepon',
+        'alamat'
     ];
     
+    /**
+     * Relationship to Transaksi
+     */
     public function transaksi()
     {
         return $this->hasMany(Transaksi::class, 'id_pelanggan', 'id_pelanggan');
     }
 }
-

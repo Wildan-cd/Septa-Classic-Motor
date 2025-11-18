@@ -12,7 +12,7 @@
             <a href="{{ route('admin.catalog.index') }}" class="admin-nav-link {{ request()->routeIs('admin.catalog.index') ? 'active' : '' }}">
                 Catalog
             </a>
-            <a href="{{ route('admin.orders') }}" class="admin-nav-link {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
+            <a href="{{ route('admin.orders.index') }}" class="admin-nav-link {{ request()->routeIs('admin.orders.index') ? 'active' : '' }}">
                 Order List
             </a>
         </nav>
