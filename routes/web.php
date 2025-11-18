@@ -7,8 +7,10 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminCatalogController;
+use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\AuthController;
 
 // Home Page
@@ -27,6 +29,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
     Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+    // Checkout Routes
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+    // Confirm Payment Routes
+    Route::get('/confirm-payment', [CheckoutController::class, 'confirmPayment'])->name('confirm.payment');
+    Route::post('/confirm-payment', [CheckoutController::class, 'confirmPaymentSubmit'])->name('confirm.payment.submit');
 });
 
 
@@ -56,9 +66,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::delete('/Admin-catalog/{id}', [AdminCatalogController::class, 'destroy'])->name('catalog.destroy');
     Route::get('/Admin-catalog/{id}/data', [AdminCatalogController::class, 'getData'])->name('catalog.getData');
     // Orders Management
-    Route::get('/orders', function () {
-        return view('admin.orders');
-    })->name('orders');
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::put('/orders/{id}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::get('/orders/{id}/print', [AdminOrderController::class, 'print'])->name('orders.print');
+    Route::get('/orders/{id}/data', [AdminOrderController::class, 'viewDetails'])->name('orders.viewDetails');
     
 });
 
@@ -79,6 +91,3 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 
 Route::get('/orders', [OrderController::class, 'index'])->name('order-status');
 
-Route::get('/checkout', function () {
-    return view('checkout');
-});

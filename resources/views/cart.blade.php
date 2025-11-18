@@ -59,7 +59,7 @@
                 {{-- Remove form (POST) - send id_produk --}}
                 <form action="{{ route('cart.remove') }}" method="POST" style="display:inline;">
                     @csrf
-                    <input type="hidden" name="id_produk" value="{{ $item['id_produk'] }}">
+                    <input type="hidden" name="id" value="{{ $item['id_produk'] }}">
                     <button class="delete-btn" title="Remove">🗑</button>
                 </form>
             </div>
@@ -81,7 +81,7 @@
             </p>
 
                 <div class="checkout-box">
-                    <button href="#" class="checkout-btn">Check Out</button>
+                    <a href="{{ route('checkout') }}" class="checkout-btn" >Check Out</a>
                 </div>
         </div>
     </div>
@@ -92,15 +92,6 @@
 
 @push('scripts')
 <script>
-/*
-  Requirements satisfied:
-  - Uses id_produk as identifier
-  - Updates UI immediately (no reload)
-  - Sends single POST fetch to route('cart.update') with id_produk and qty
-  - Updates subtotal per item and overall subtotal
-  - Gracefully prevents qty < 1
-*/
-
 // CSRF token (Blade -> JS)
 const CSRF_TOKEN = @json(csrf_token());
 
