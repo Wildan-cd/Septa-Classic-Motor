@@ -12,13 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pengiriman', function (Blueprint $table) {
-            $table->id('id_pengiriman')->autoIncrement();
-            $table->foreignId('id_transaksi')
-                ->constrained('transaksi', 'id_transaksi')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-            $table->enum('status_pengiriman', ['Diproses', 'Dikirim', 'Selesai'])->default('Diproses');
-            $table->date('tgl_pengiriman')->nullable();
+            $table->id('id_pengiriman');
+            $table->unsignedBigInteger('id_transaksi');
+            $table->string('nama_penerima');
+            $table->text('alamat_lengkap');
+            $table->string('kota');
+            $table->string('no_hp');
+            $table->string('status_pengiriman')->default('Diproses');
+            $table->foreign('id_transaksi')
+                ->references('id_transaksi')
+                ->on('transaksi')
+                ->onDelete('cascade');
         });
     }
 

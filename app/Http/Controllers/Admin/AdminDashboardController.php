@@ -15,12 +15,11 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // Get current month and previous month for comparison
+
         $currentMonth = Carbon::now()->month;
         $previousMonth = Carbon::now()->subMonth()->month;
         $currentYear = Carbon::now()->year;
 
-        // Calculate Total Orders - Semua transaksi bulan ini
         $totalOrdersCurrentMonth = Transaksi::whereMonth('tgl_transaksi', $currentMonth)
             ->whereYear('tgl_transaksi', $currentYear)
             ->sum('total_harga');
@@ -33,7 +32,6 @@ class AdminDashboardController extends Controller
             ? (($totalOrdersCurrentMonth - $totalOrdersPreviousMonth) / $totalOrdersPreviousMonth) * 100 
             : 0;
 
-        // Calculate Active Orders - Transaksi dengan status Pending atau yang sedang diproses/dikirim
         $activeOrdersCurrentMonth = Transaksi::whereMonth('tgl_transaksi', $currentMonth)
             ->whereYear('tgl_transaksi', $currentYear)
             ->where(function($query) {
@@ -58,7 +56,6 @@ class AdminDashboardController extends Controller
             ? (($activeOrdersCurrentMonth - $activeOrdersPreviousMonth) / $activeOrdersPreviousMonth) * 100 
             : 0;
 
-        // Calculate Completed Orders - Transaksi Lunas dengan pengiriman Selesai
         $completedOrdersCurrentMonth = Transaksi::whereMonth('tgl_transaksi', $currentMonth)
             ->whereYear('tgl_transaksi', $currentYear)
             ->where('status_pembayaran', 'Lunas')
@@ -93,31 +90,30 @@ class AdminDashboardController extends Controller
                 'produk.id_produk',
                 'produk.nama_produk',
                 'produk.harga',
+                'produk.gambar',
                 DB::raw('SUM(detail_transaksi.jumlah) as total_sales'),
                 DB::raw('SUM(detail_transaksi.jumlah * detail_transaksi.harga_satuan) as total_revenue')
             )
             ->join('detail_transaksi', 'produk.id_produk', '=', 'detail_transaksi.id_produk')
             ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
             ->where('transaksi.status_pembayaran', 'Lunas')
-            ->groupBy('produk.id_produk', 'produk.nama_produk', 'produk.harga')
+            ->groupBy('produk.id_produk', 'produk.nama_produk', 'produk.harga', 'produk.gambar')
             ->orderByDesc('total_sales')
             ->limit(3)
             ->get();
 
-        // Get Sales Chart Data (Monthly by default)
         $salesChartData = $this->getSalesChartData('monthly');
 
-        // Get Recent Orders with all relations
         $recentOrders = Transaksi::with(['pelanggan', 'pengiriman', 'detailTransaksi.produk'])
             ->orderBy('tgl_transaksi', 'desc')
             ->limit(6)
             ->get()
             ->map(function ($order) {
-                // Get product names from detail transaksi
                 $productNames = $order->detailTransaksi->pluck('produk.nama_produk')->filter()->implode(', ');
                 $order->product_name = $productNames ?: 'Lorem Ipsum';
                 return $order;
             });
+
 
         return view('admin.dashboard', compact('stats', 'bestSellers', 'salesChartData', 'recentOrders'));
     }
@@ -136,7 +132,6 @@ class AdminDashboardController extends Controller
         $data = [];
         
         if ($period === 'weekly') {
-            // Last 7 days
             for ($i = 6; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i);
                 $labels[] = $date->format('D');
@@ -147,7 +142,6 @@ class AdminDashboardController extends Controller
                 $data[] = (float) $sales;
             }
         } elseif ($period === 'monthly') {
-            // Last 6 months
             $months = ['JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
             
             for ($i = 5; $i >= 0; $i--) {
@@ -160,8 +154,7 @@ class AdminDashboardController extends Controller
                     
                 $data[] = (float) $sales;
             }
-        } else { // yearly
-            // Last 5 years
+        } else { 
             for ($i = 4; $i >= 0; $i--) {
                 $year = Carbon::now()->subYears($i)->year;
                 $labels[] = (string) $year;

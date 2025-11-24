@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminCatalogController extends Controller
 {
-    /**
-     * Display a listing of the products.
-     */
     public function index()
     {
         $produks = Produk::orderBy('id_produk', 'desc')->get();
@@ -26,17 +23,11 @@ class AdminCatalogController extends Controller
         return view('admin.catalog.index', compact('produks'));
     }
 
-    /**
-     * Show the form for creating a new product.
-     */
     public function create()
     {
         return view('admin.catalog.form', ['produk' => null]);
     }
 
-    /**
-     * Store a newly created product in storage.
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -82,18 +73,12 @@ class AdminCatalogController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified product.
-     */
     public function edit($id)
     {
         $produk = Produk::findOrFail($id);
         return view('admin.catalog.form', ['produk' => $produk]);
     }
 
-    /**
-     * Update the specified product in storage.
-     */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -146,21 +131,11 @@ class AdminCatalogController extends Controller
         }
     }
 
-    /**
-     * Remove the specified product from storage.
-     */
     public function destroy($id)
     {
         try {
             $produk = Produk::findOrFail($id);
-            
-            // // Cek apakah produk sudah ada transaksi
-            // if ($produk->detailTransaksi()->count() > 0) {
-            //     return redirect()->back()
-            //         ->with('error', 'Produk tidak dapat dihapus karena sudah ada transaksi!');
-            // }
 
-            // Delete image if exists
             if ($produk->gambar && file_exists(public_path($produk->gambar))) {
                 unlink(public_path($produk->gambar));
             }

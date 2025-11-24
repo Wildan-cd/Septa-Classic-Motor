@@ -8,6 +8,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\GeminiChatController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminCatalogController;
 use App\Http\Controllers\Admin\AdminOrderController;
@@ -27,7 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
-    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::delete('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
     // Checkout Routes
@@ -35,8 +36,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 
     // Confirm Payment Routes
-    Route::get('/confirm-payment', [CheckoutController::class, 'confirmPayment'])->name('confirm.payment');
-    Route::post('/confirm-payment', [CheckoutController::class, 'confirmPaymentSubmit'])->name('confirm.payment.submit');
+    Route::get('/confirm-payment/{id}', [CheckoutController::class, 'confirmPayment'])->name('confirm.payment');
+    Route::post('/confirm-payment/{id}', [CheckoutController::class, 'confirmPaymentSubmit'])->name('confirm.payment.submit');
+    Route::post('/payment/cancel/{id}', [CheckoutController::class, 'cancelPayment'])->name('payment.cancel');
 });
 
 
@@ -68,9 +70,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // Orders Management
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
-    Route::put('/orders/{id}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::post('/orders/{id}/update', [AdminOrderController::class, 'updateStatus'])->name('orders.update');
     Route::get('/orders/{id}/print', [AdminOrderController::class, 'print'])->name('orders.print');
     Route::get('/orders/{id}/data', [AdminOrderController::class, 'viewDetails'])->name('orders.viewDetails');
+    Route::post('/admin/orders/bulk-delete', [AdminOrderController::class, 'bulkDestroy'])->name('orders.bulk_delete');
     
 });
 
@@ -89,5 +92,6 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
-Route::get('/orders', [OrderController::class, 'index'])->name('order-status');
+Route::get('/order-status', [OrderController::class, 'index'])->name('order.status');
+Route::post('/chat/send', [GeminiChatController::class, 'chat'])->name('chat.send');
 

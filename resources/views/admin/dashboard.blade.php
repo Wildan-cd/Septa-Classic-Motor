@@ -12,13 +12,6 @@
         <div class="stat-card">
             <div class="stat-header">
                 <span class="stat-label">Total Orders</span>
-                <button class="stat-menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="1"></circle>
-                        <circle cx="12" cy="5" r="1"></circle>
-                        <circle cx="12" cy="19" r="1"></circle>
-                    </svg>
-                </button>
             </div>
             <div class="stat-value">Rp. {{ number_format($stats['total_orders'], 0, ',', '.') }}</div>
             <div class="stat-footer">
@@ -33,13 +26,6 @@
         <div class="stat-card">
             <div class="stat-header">
                 <span class="stat-label">Active Orders</span>
-                <button class="stat-menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="1"></circle>
-                        <circle cx="12" cy="5" r="1"></circle>
-                        <circle cx="12" cy="19" r="1"></circle>
-                    </svg>
-                </button>
             </div>
             <div class="stat-value">Rp. {{ number_format($stats['active_orders'], 0, ',', '.') }}</div>
             <div class="stat-footer">
@@ -55,11 +41,6 @@
             <div class="stat-header">
                 <span class="stat-label">Completed Orders</span>
                 <button class="stat-menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="1"></circle>
-                        <circle cx="12" cy="5" r="1"></circle>
-                        <circle cx="12" cy="19" r="1"></circle>
-                    </svg>
                 </button>
             </div>
             <div class="stat-value">Rp. {{ number_format($stats['completed_orders'], 0, ',', '.') }}</div>
@@ -93,19 +74,15 @@
         <div class="bestsellers-card">
             <div class="bestsellers-header">
                 <h2 class="chart-title">Best Sellers</h2>
-                <button class="stat-menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="1"></circle>
-                        <circle cx="12" cy="5" r="1"></circle>
-                        <circle cx="12" cy="19" r="1"></circle>
-                    </svg>
-                </button>
             </div>
             <div class="bestsellers-list">
                 @foreach($bestSellers as $product)
                 <div class="bestseller-item">
                     <div class="bestseller-image">
-                        <img src="{{ asset($product->gambar ?? 'images/placeholder.jpg') }}" alt="{{ $product->nama_produk }}">
+                        {{-- Hapus onerror agar kita bisa lihat URL aslinya --}}
+                        <img src="{{ asset($product->gambar) }}" 
+                            alt="{{ $product->nama_produk }}"
+                            style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="bestseller-info">
                         <div class="bestseller-name">{{ $product->nama_produk }}</div>
@@ -118,65 +95,114 @@
                 </div>
                 @endforeach
             </div>
-            <button class="btn-report">REPORT</button>
         </div>
     </div>
     
     {{-- Recent Orders --}}
-    <div class="recent-orders-section">
-        <div class="section-header">
-            <h2 class="section-title">Recent Orders</h2>
-            <button class="stat-menu">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<div class="recent-orders-section">
+    <div class="section-header">
+        <h2 class="section-title">Recent Orders</h2>
+        
+        {{-- CUSTOM DROPDOWN MENU --}}
+        <div class="custom-dropdown" style="position: relative;">
+            <button class="stat-menu" onclick="toggleDropdown(event)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="1"></circle>
                     <circle cx="12" cy="5" r="1"></circle>
                     <circle cx="12" cy="19" r="1"></circle>
                 </svg>
             </button>
+            
+            {{-- Isi Menu Dropdown --}}
+            <div id="dropdown-content" class="custom-dropdown-content">
+                <a href="javascript:void(0)" onclick="deleteSelectedOrders()" class="text-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Delete
+                </a>
+            </div>
         </div>
-        
-        <div class="table-container">
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" id="selectAll"></th>
-                        <th>Product</th>
-                        <th>Order ID</th>
-                        <th>Date</th>
-                        <th>Customer Name</th>
-                        <th>Status</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($recentOrders as $order)
-                    <tr>
-                        <td><input type="checkbox" class="order-checkbox"></td>
-                        <td>{{ $order->product_name ?? 'Lorem Ipsum' }}</td>
-                        <td>#{{ $order->id_transaksi }}</td>
-                        <td>{{ \Carbon\Carbon::parse($order->tgl_transaksi)->format('M jS, Y') }}</td>
-                        <td>
-                            <div class="customer-info">
-                                <div class="customer-avatar">{{ substr($order->pelanggan->nama ?? 'U', 0, 1) }}</div>
-                                <span>{{ $order->pelanggan->nama ?? 'Unknown' }}</span>
+    </div>
+    
+    <div class="table-container">
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="checkAll">
+                    </th>
+                    <th>Product</th>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Customer Name</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($recentOrders as $order)
+                <tr id="row-{{ $order->id_transaksi }}">
+                    <td>
+                        {{-- Value ID Transaksi untuk JS --}}
+                        <input type="checkbox" class="order-checkbox" value="{{ $order->id_transaksi }}">
+                    </td>
+                    
+                    {{-- Nama Produk --}}
+                    <td>
+                        @if($order->detailTransaksi->first())
+                            <strong>{{ $order->detailTransaksi->first()->produk->nama_produk ?? 'Item Dihapus' }}</strong>
+                            @if($order->detailTransaksi->count() > 1)
+                                <small style="display:block; color:#888; font-size: 12px;">+{{ $order->detailTransaksi->count() - 1 }} lainnya</small>
+                            @endif
+                        @else
+                            <span>-</span>
+                        @endif
+                    </td>
+
+                    {{-- Order ID --}}
+                    <td>#{{ str_pad($order->id_transaksi, 1, '0', STR_PAD_LEFT) }}</td>
+                    
+                    {{-- Tanggal --}}
+                    <td>{{ date('M d, Y', strtotime($order->tgl_transaksi)) }}</td>
+                    
+                    {{-- Customer Name (Sesuai CSS .customer-info Anda) --}}
+                    <td>
+                        <div class="customer-info">
+                            <div class="customer-avatar">
+                                {{ substr(optional($order->pelanggan)->name ?? 'U', 0, 1) }}
                             </div>
-                        </td>
-                        <td>
-                            <span class="status-badge status-{{ strtolower($order->pengiriman->status_pengiriman ?? 'pending') }}">
-                                {{ $order->pengiriman->status_pengiriman ?? 'Pending' }}
-                            </span>
-                        </td>
-                        <td>Rp. {{ number_format($order->total_harga, 0, ',', '.') }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                            <span>{{ optional($order->pelanggan)->name ?? 'Guest / Unknown' }}</span>
+                        </div>
+                    </td>
+
+                    {{-- Status Badge (Sesuai CSS .status-badge Anda) --}}
+                    <td>
+                        @php
+                            $status = optional($order->pengiriman)->status_pengiriman ?? 'Diproses';
+                            // Mapping status ke class CSS Anda (lowercase)
+                            // Contoh: 'Dikirim' -> 'status-dikirim'
+                            $statusClass = 'status-' . strtolower($status);
+                        @endphp
+                        <span class="status-badge {{ $statusClass }}">
+                            {{ $status }}
+                        </span>
+                    </td>
+
+                    {{-- Amount --}}
+                    <td>Rp. {{ number_format($order->total_harga, 0, ',', '.') }}</td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px; color: #999;">Belum ada pesanan terbaru.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     // Sales Chart Data from Controller
     const salesData = @json($salesChartData);
@@ -269,14 +295,87 @@
         });
     });
     
-    // Select All Checkbox
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const orderCheckboxes = document.querySelectorAll('.order-checkbox');
-    
-    selectAllCheckbox.addEventListener('change', function() {
-        orderCheckboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
+// 1. Fitur Select All
+    document.getElementById('checkAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.order-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
     });
+
+    // 2. Fitur Delete Selected
+function toggleDropdown(event) {
+        event.stopPropagation(); // Cegah event bubbling
+        const dropdown = document.getElementById("dropdown-content");
+        dropdown.classList.toggle("show");
+    }
+
+    // Tutup dropdown jika klik di luar
+    window.onclick = function(event) {
+        if (!event.target.matches('.stat-menu') && !event.target.closest('.stat-menu')) {
+            var dropdowns = document.getElementsByClassName("custom-dropdown-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+
+    // --- 2. FUNGSI SELECT ALL ---
+    document.getElementById('checkAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.order-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // --- 3. FUNGSI DELETE SELECTED ---
+    function deleteSelectedOrders() {
+        // Sembunyikan dropdown setelah klik
+        document.getElementById("dropdown-content").classList.remove("show");
+
+        const selectedIds = Array.from(document.querySelectorAll('.order-checkbox:checked')).map(cb => cb.value);
+
+        if (selectedIds.length === 0) {
+            Swal.fire('Peringatan', 'Pilih pesanan terlebih dahulu.', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Hapus Pesanan?',
+            text: "Data yang dihapus tidak bisa kembali!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444', // Warna Merah sesuai CSS admin-red
+            cancelButtonColor: '#8b8b8b',
+            confirmButtonText: 'Ya, Hapus!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch("{{ route('admin.orders.bulk_delete') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({ ids: selectedIds })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire('Berhasil!', data.message, 'success');
+                        selectedIds.forEach(id => {
+                            const row = document.getElementById('row-' + id);
+                            if(row) row.remove();
+                        });
+                        document.getElementById('checkAll').checked = false;
+                    } else {
+                        Swal.fire('Gagal', 'Terjadi kesalahan.', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire('Error', 'Gagal koneksi server.', 'error');
+                });
+            }
+        });
+    }
 </script>
 @endpush

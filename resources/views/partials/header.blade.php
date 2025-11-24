@@ -16,7 +16,7 @@
                 <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">
                     About
                 </a>
-                <a href="{{ route('order-status') }}" class="nav-link {{ request()->routeIs('order-status') ? 'active' : '' }}">
+                <a href="{{ route('order.status') }}" class="nav-link {{ request()->routeIs('order.status') ? 'active' : '' }}">
                     Order Status
                 </a>
             </nav>

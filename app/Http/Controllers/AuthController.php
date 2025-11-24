@@ -12,8 +12,6 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // ==================== LOGIN ====================
-    
     public function showLoginForm()
     {
         if (Auth::check()) {
@@ -34,7 +32,6 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             
-            // Redirect based on user role (jika ada)
             if (Auth::user()->role === 'admin') {
                 return redirect()->intended(route('admin.dashboard'));
             }
@@ -46,8 +43,6 @@ class AuthController extends Controller
             'email' => ['The provided credentials do not match our records.'],
         ]);
     }
-    
-    // ==================== REGISTER ====================
     
     public function showRegisterForm()
     {
@@ -87,8 +82,6 @@ class AuthController extends Controller
             ->with('success', 'Registration successful! Welcome to Septa Classic Motor.');
     }
     
-    // ==================== FORGOT PASSWORD ====================
-    
     public function showForgotPasswordForm()
     {
         return view('auth.forgot-password');
@@ -113,8 +106,6 @@ class AuthController extends Controller
             'email' => [__($status)],
         ]);
     }
-    
-    // ==================== RESET PASSWORD ====================
     
     public function showResetPasswordForm(Request $request, $token)
     {
@@ -150,8 +141,6 @@ class AuthController extends Controller
             'email' => [__($status)],
         ]);
     }
-    
-    // ==================== LOGOUT ====================
     
     public function logout(Request $request)
     {

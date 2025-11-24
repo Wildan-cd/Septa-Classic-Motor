@@ -52,21 +52,50 @@
                     </div>
                     
                     {{-- Category Filter --}}
-                    <div class="filter-group">
-                        <label class="filter-label">Category</label>
-                        <div class="filter-options">
-                            <label class="filter-option">
-                                <input type="radio" name="category" value="" {{ !request('kategori') ? 'checked' : '' }} onchange="filterProducts()">
-                                <span>All Categories</span>
+                    <form action="{{ route('catalog') }}" method="GET" id="filterForm">
+                        
+                        {{-- 1. OPSI ALL CATEGORIES --}}
+                        {{-- Tambahkan class 'filter-option' di div pembungkus --}}
+                        <div class="form-check filter-option">
+                            <input class="form-check-input" 
+                                type="radio" 
+                                name="category" 
+                                id="cat_all" 
+                                value="" 
+                                onchange="this.form.submit()"
+                                {{ request('category') == '' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="cat_all">
+                                All Categories
                             </label>
-                            @foreach($categories as $category)
-                            <label class="filter-option">
-                                <input type="radio" name="category" value="{{ $category }}" {{ request('kategori') == $category ? 'checked' : '' }} onchange="filterProducts()">
-                                <span>{{ $category }}</span>
-                            </label>
-                            @endforeach
                         </div>
-                    </div>
+
+                        {{-- 2. OPSI KATEGORI DARI DATABASE --}}
+                        @foreach($categories as $catName)
+                        {{-- Tambahkan class 'filter-option' di sini juga --}}
+                        <div class="form-check filter-option">
+                            <input class="form-check-input" 
+                                type="radio" 
+                                name="category" 
+                                id="cat_{{ Str::slug($catName) }}" 
+                                value="{{ $catName }}" 
+                                onchange="this.form.submit()"
+                                {{ request('category') == $catName ? 'checked' : '' }}>
+                            
+                            <label class="form-check-label" for="cat_{{ Str::slug($catName) }}">
+                                {{ $catName }}
+                            </label>
+                        </div>
+                        @endforeach
+
+                        {{-- Input Hidden untuk Search/Sort --}}
+                        @if(request('search'))
+                            <input type="hidden" name="search" value="{{ request('search') }}">
+                        @endif
+                        @if(request('sort'))
+                            <input type="hidden" name="sort" value="{{ request('sort') }}">
+                        @endif
+
+                    </form>
                     
                     {{-- Price Range --}}
                     <div class="filter-group">

@@ -14,75 +14,97 @@
     <hr>
 
     <h3 class="cart-subtitle">Shopping cart</h3>
-    <p class="cart-count">You have {{ count($cart) }} items in your cart</p>
+    {{-- UBAH: $cart menjadi $cartItems --}}
+    <p class="cart-count">You have {{ $cartItems->count() }} items in your cart</p>
 
     <div class="cart-list">
-        @foreach($cart as $item)
-        {{-- cart-item: data attributes for JS --}}
-        <div class="cart-item" data-id="{{ $item['id_produk'] }}" data-price="{{ $item['harga'] }}">
+        {{-- UBAH: Loop variabel $cartItems --}}
+        @foreach($cartItems as $item)
+        
+        {{-- UBAH: Akses object (->) bukan array ([]). Ambil data dari relasi produk --}}
+        <div class="cart-item" data-id="{{ $item->id_produk }}" data-price="{{ $item->price }}">
             <div class="cart-item-left">
                 <input type="checkbox" class="w-5 h-5 accent-black cursor-pointer"/>
-                <img src="/storage/{{ $item['gambar'] }}" class="cart-img" alt="{{ $item['nama'] }}">
+                
+                {{-- GAMBAR: Ambil dari $item->produk->gambar --}}
+                @if($item->produk && $item->produk->gambar)
+                    <img src="{{ asset($item->produk->gambar) }}" class="cart-img" alt="{{ $item->produk->nama_produk }}">
+                @else
+                    <img src="{{ asset('images/placeholder.jpg') }}" class="cart-img" alt="Product">
+                @endif
+
                 <div>
-                    <h4 class="cart-item-title">{{ $item['nama'] }}</h4>
+                    {{-- NAMA: Ambil dari $item->produk->nama_produk --}}
+                    <h4 class="cart-item-title">{{ $item->produk->nama_produk ?? 'Produk tidak ditemukan' }}</h4>
                 </div>
             </div>
 
             <div class="cart-item-right">
                 <div class="qty-box">
-                    {{-- minus button --}}
+                    {{-- MINUS BUTTON --}}
                     <button type="button"
                         class="qty-btn minus"
-                        data-id="{{ $item['id_produk'] }}"
+                        data-id="{{ $item->id_produk }}"
                         aria-label="decrease">-</button>
 
-                    {{-- qty display (span) --}}
-                    <span class="qty-number" id="qty-{{ $item['id_produk'] }}">
-                        {{ $item['qty'] }}
+                    {{-- QTY DISPLAY: Gunakan ->quantity --}}
+                    <span class="qty-number" id="qty-{{ $item->id_produk }}">
+                        {{ $item->quantity }}
                     </span>
 
-                    {{-- plus button --}}
+                    {{-- PLUS BUTTON --}}
                     <button type="button"
                         class="qty-btn plus"
-                        data-id="{{ $item['id_produk'] }}"
+                        data-id="{{ $item->id_produk }}"
                         aria-label="increase">+</button>
                 </div>
 
-                {{-- price subtotal per item --}}
-                <p class="price" id="subtotal-{{ $item['id_produk'] }}">
-                    Rp. {{ number_format($item['harga'] * $item['qty'],0,',','.') }}
+                {{-- PRICE SUBTOTAL: Gunakan ->price * ->quantity --}}
+                <p class="price" id="subtotal-{{ $item->id_produk }}">
+                    Rp. {{ number_format($item->price * $item->quantity, 0, ',', '.') }}
                 </p>
 
-                {{-- hidden element with unit price for JS --}}
-                <input type="hidden" id="unitprice-{{ $item['id_produk'] }}" value="{{ $item['harga'] }}">
+                {{-- HIDDEN UNIT PRICE --}}
+                <input type="hidden" id="unitprice-{{ $item->id_produk }}" value="{{ $item->price }}">
 
-                {{-- Remove form (POST) - send id_produk --}}
-                <form action="{{ route('cart.remove') }}" method="POST" style="display:inline;">
+                {{-- REMOVE FORM --}}
+                {{-- Pastikan route 'cart.remove' sudah dibuat di web.php --}}
+                {{-- Form Hapus Produk --}}
+                <form action="{{ route('cart.remove') }}" method="POST" class="delete-form" style="display:inline;">
                     @csrf
-                    <input type="hidden" name="id" value="{{ $item['id_produk'] }}">
-                    <button class="delete-btn" title="Remove">🗑</button>
+                    @method('DELETE') 
+                    <input type="hidden" name="id" value="{{ $item->id_produk }}">
+                    
+                    {{-- HAPUS onclick="return confirm..." dari sini --}}
+                    <button type="submit" class="delete-btn" title="Hapus Produk">
+                        🗑
+                    </button>
                 </form>
             </div>
         </div>
         @endforeach
+        
+        @if($cartItems->isEmpty())
+            <p style="text-align:center; margin: 20px 0;">Keranjang belanja Anda kosong.</p>
+        @endif
     </div>
 
-    {{-- Checkout area with subtotal at the side --}}
+    {{-- CHECKOUT AREA --}}
     <div class="checkout-area" style="display:flex; justify-content:space-between; align-items:center; margin-top:24px;">
-        <div>
-            {{-- left side: empty or summary --}}
-        </div>
+        <div></div>
 
         <div class="checkout-box" style="text-align:right;">
             <p class="subtotal-text" style="margin-bottom:8px;">
+                {{-- SUBTOTAL GLOBAL: Hitung ulang pakai collection sum --}}
                 Subtotal: <strong id="cartSubtotal">
-                    Rp. {{ number_format(collect($cart)->sum(fn($i) => $i['harga'] * $i['qty']), 0, ',', '.') }}
+                    Rp. {{ number_format($cartItems->sum(fn($i) => $i->price * $i->quantity), 0, ',', '.') }}
                 </strong>
             </p>
 
-                <div class="checkout-box">
-                    <a href="{{ route('checkout') }}" class="checkout-btn" >Check Out</a>
-                </div>
+            <div class="checkout-box">
+                {{-- Button href tidak valid, ganti jadi <a> --}}
+                <a href="{{ route('checkout') }}" class="checkout-btn" style="text-decoration:none; display:inline-block; padding:10px 20px; background:black; color:white;">Check Out</a>
+            </div>
         </div>
     </div>
 
@@ -92,103 +114,128 @@
 
 @push('scripts')
 <script>
-// CSRF token (Blade -> JS)
-const CSRF_TOKEN = @json(csrf_token());
+const CSRF_TOKEN = '{{ csrf_token() }}'; // Cara ambil token yang lebih simpel
 
-// Helper: format number to "Rp. 1.234"
 function formatRupiahNumber(number) {
     return 'Rp. ' + Number(number).toLocaleString('id-ID');
 }
 
-// Recalculate overall subtotal (sum of subtotals shown)
 function recalcCartSubtotal() {
     let total = 0;
+    // Loop semua elemen yang punya ID diawali 'subtotal-'
     document.querySelectorAll('[id^="subtotal-"]').forEach(el => {
-        // el text like "Rp. 1.234", remove non digits
-        const digits = el.innerText.replace(/\D/g, '');
-        total += parseInt(digits || 0, 10);
+        // Hapus "Rp. " dan titik, ambil angkanya saja
+        const textVal = el.innerText.replace(/[^\d]/g, '');
+        total += parseInt(textVal || 0, 10);
     });
     document.getElementById('cartSubtotal').innerText = formatRupiahNumber(total);
-    return total;
 }
 
-// Update server (session/db) via POST, non-blocking (fire-and-forget but handle errors)
 function sendUpdateToServer(id_produk, qty) {
+    // Pastikan route cart.update ada di web.php
     fetch("{{ route('cart.update') }}", {
-        method: "POST",
+        method: "POST", // Atau PATCH
         headers: {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": CSRF_TOKEN
         },
         body: JSON.stringify({
             id_produk: id_produk,
-            qty: qty
+            quantity: qty // Sesuaikan key dengan controller (quantity)
         })
     })
     .then(res => res.json())
     .then(data => {
-        // optionally handle server errors (show toast)
-        if (data && data.success === false) {
-            console.error('Update failed', data);
-            // optionally show message to user
+        if (data.status === 'error') {
+            alert(data.message);
+            location.reload(); // Reload jika stok habis/error
         }
+        console.log('Updated:', data);
     })
-    .catch(err => {
-        console.error('Fetch error', err);
-    });
+    .catch(err => console.error('Error:', err));
 }
 
-// Update quantity (called by buttons)
 function updateQtyUI(id_produk, newQty) {
-    if (newQty < 1) newQty = 1;
+    if (newQty < 1) return; // Jangan biarkan 0 di frontend
 
-    // update qty displayed
+    // 1. Update angka di layar
     const qtyEl = document.getElementById(`qty-${id_produk}`);
-    if (!qtyEl) return;
-    qtyEl.innerText = newQty;
+    if (qtyEl) qtyEl.innerText = newQty;
 
-    // compute new subtotal = unitPrice * qty
+    // 2. Hitung subtotal per item
     const unitInput = document.getElementById(`unitprice-${id_produk}`);
-    const unitPrice = unitInput ? parseInt(unitInput.value, 10) : parseInt(document.querySelector(`[data-id="${id_produk}"]`)?.dataset.price || 0, 10);
+    const unitPrice = unitInput ? parseInt(unitInput.value, 10) : 0;
     const newSubtotal = unitPrice * newQty;
 
     const subtotalEl = document.getElementById(`subtotal-${id_produk}`);
     if (subtotalEl) subtotalEl.innerText = formatRupiahNumber(newSubtotal);
 
-    // recalc grand total
+    // 3. Hitung total belanja
     recalcCartSubtotal();
 
-    // send to server
+    // 4. Kirim ke server (Database)
     sendUpdateToServer(id_produk, newQty);
 }
 
-// attach events (plus/minus)
-function attachQtyEvents() {
-    document.querySelectorAll('.qty-btn.plus').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            const id = this.dataset.id;
-            const qtyEl = document.getElementById('qty-' + id);
-            let qty = parseInt(qtyEl.innerText || '0', 10);
-            qty = qty + 1;
-            updateQtyUI(id, qty);
-        });
-    });
-
-    document.querySelectorAll('.qty-btn.minus').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            const id = this.dataset.id;
-            const qtyEl = document.getElementById('qty-' + id);
-            let qty = parseInt(qtyEl.innerText || '0', 10);
-            qty = Math.max(1, qty - 1);
-            updateQtyUI(id, qty);
-        });
-    });
-}
-
-// run on DOM ready
 document.addEventListener('DOMContentLoaded', function() {
-    attachQtyEvents();
+    // Event Listener Tombol Plus
+    document.querySelectorAll('.qty-btn.plus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const qtyEl = document.getElementById('qty-' + id);
+            let qty = parseInt(qtyEl.innerText || '1', 10);
+            updateQtyUI(id, qty + 1);
+        });
+    });
+
+    // Event Listener Tombol Minus
+    document.querySelectorAll('.qty-btn.minus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const qtyEl = document.getElementById('qty-' + id);
+            let qty = parseInt(qtyEl.innerText || '1', 10);
+            if (qty > 1) {
+                updateQtyUI(id, qty - 1);
+            }
+        });
+    });
+    
+    // Hitung ulang saat pertama load (opsional)
     recalcCartSubtotal();
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+        // Ambil semua form yang punya class 'delete-form'
+        const deleteForms = document.querySelectorAll('.delete-form');
+
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Cegah form terkirim langsung
+
+                Swal.fire({
+                    title: 'Hapus Produk?',
+                    text: "Produk ini akan dihapus dari keranjang Anda.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33', // Warna Merah
+                    cancelButtonColor: '#3085d6', // Warna Biru
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Tampilkan Loading sebentar
+                        Swal.fire({
+                            title: 'Menghapus...',
+                            timer: 1000,
+                            didOpen: () => Swal.showLoading()
+                        });
+                        
+                        // Kirim form secara manual
+                        this.submit(); 
+                    }
+                });
+            });
+        });
+    });
 </script>
 @endpush

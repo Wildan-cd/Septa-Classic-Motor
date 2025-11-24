@@ -17,9 +17,6 @@ class Pelanggan extends Model
         'alamat'
     ];
     
-    /**
-     * Relationship to Transaksi
-     */
     public function transaksi()
     {
         return $this->hasMany(Transaksi::class, 'id_pelanggan', 'id_pelanggan');
