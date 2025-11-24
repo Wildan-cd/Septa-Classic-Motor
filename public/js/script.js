@@ -1,31 +1,3 @@
-// Active Navigation Handler
-document.addEventListener('DOMContentLoaded', function() {
-    // Get current page URL
-    const currentUrl = window.location.pathname;
-    
-    // Get all nav links
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    // Remove active class from all links first
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-        
-        // Get link href
-        const linkHref = link.getAttribute('href');
-        
-        // Check if current URL matches link href
-        if (currentUrl === linkHref || 
-            (linkHref !== '/' && currentUrl.startsWith(linkHref))) {
-            link.classList.add('active');
-        }
-        
-        // Special case for home page
-        if (currentUrl === '/' && linkHref === '/') {
-            link.classList.add('active');
-        }
-    });
-});
-
 // Mobile Menu Toggle - FIXED
 const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 const nav = document.querySelector('.nav');
@@ -196,8 +168,6 @@ updateCartCount();
 document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', (e) => {
         if (!e.target.classList.contains('add-to-cart-btn')) {
-            // Navigate to product detail
-            // window.location.href = `/product/${card.dataset.productId}`;
         }
     });
 });

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <title>Login - Septa Classic Motor</title>
     <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
 </head>
@@ -10,7 +11,7 @@
     <div class="auth-container">
         <div class="auth-card">
             <!-- Left Side - Image with Logo -->
-            <div class="auth-left">
+            <div class="auth-left" style="background-image: url('{{ asset('images/motor1.1.jpg') }}');">
                 <div class="auth-image-overlay"></div>
                 <div class="auth-logo-container">
                     <img src="{{ asset('images/logo.png') }}" alt="Septa Classic Motor" class="auth-logo">
@@ -94,7 +95,6 @@
                                 <input type="checkbox" name="remember" id="remember">
                                 <span>Remember me</span>
                             </label>
-                            <a href="{{ route('password.request') }}" class="forgot-link">Forgot password</a>
                         </div>
                         
                         <!-- Submit Button -->

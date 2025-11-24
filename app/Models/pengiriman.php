@@ -9,17 +9,16 @@ class Pengiriman extends Model
     protected $table = 'pengiriman';
     protected $primaryKey = 'id_pengiriman';
     public $timestamps = false;
-    
+
     protected $fillable = [
         'id_transaksi',
-        'status_pengiriman',
-        'tgl_pengiriman'
+        'nama_penerima',
+        'alamat_lengkap',
+        'kota',
+        'no_hp',
+        'status_pengiriman'
     ];
-    
-    protected $casts = [
-        'tgl_pengiriman' => 'date'
-    ];
-    
+
     public function transaksi()
     {
         return $this->belongsTo(Transaksi::class, 'id_transaksi', 'id_transaksi');

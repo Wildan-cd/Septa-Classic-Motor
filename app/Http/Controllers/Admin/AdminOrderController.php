@@ -5,118 +5,78 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
 use App\Models\DetailTransaksi;
-use App\Models\pelanggan;
+use App\Models\Pengiriman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminOrderController extends Controller
 {
-    /**
-     * Display a listing of orders.
-     */
-    public function index(Request $request)
+public function index(Request $request)
     {
-        $query = Transaksi::with(['pelanggan', 'detailTransaksi.produk'])
-            ->orderBy('id_transaksi', 'desc');
+        $query = Transaksi::with(['pelanggan', 'pengiriman', 'detailTransaksi.produk'])
+                    ->orderBy('tgl_transaksi', 'desc');
 
-        // Filter by status
-        if ($request->has('status') && $request->status != '') {
+        if ($request->start_date && $request->end_date) {
+            $query->whereBetween('tgl_transaksi', [$request->start_date, $request->end_date]);
+        }
+
+        if ($request->status && $request->status != 'all') {
             $query->where('status_pembayaran', $request->status);
         }
 
-        // Filter by date range
-        if ($request->has('start_date') && $request->start_date != '') {
-            $query->whereDate('tanggal_transaksi', '>=', $request->start_date);
-        }
-        
-        if ($request->has('end_date') && $request->end_date != '') {
-            $query->whereDate('tanggal_transaksi', '<=', $request->end_date);
-        }
+        $orders = $query->paginate(10);
 
-        $transaksis = $query->paginate(15);
-        
-        return view('admin.orders.index', compact('transaksis'));
+        return view('admin.orders.index', compact('orders'));
     }
 
-    /**
-     * Display the specified order details.
-     */
     public function show($id)
     {
-        $transaksi = Transaksi::with(['pelanggan', 'detailTransaksi.produk'])
-            ->findOrFail($id);
-            
-        return view('admin.orders.detail', compact('transaksi'));
+        $order = Transaksi::with(['pelanggan', 'pengiriman', 'detailTransaksi.produk'])
+                    ->findOrFail($id);
+
+        return view('admin.orders.detail', compact('order'));
     }
 
-    /**
-     * Update order status.
-     */
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'status_pembayaran' => 'required|in:Pending,Completed,Cancelled',
-            'catatan' => 'nullable|string'
-        ]);
+        $transaksi = Transaksi::findOrFail($id);
 
-        try {
-            DB::beginTransaction();
-
-            $transaksi = Transaksi::findOrFail($id);
-            
-            // Update status
+        if ($request->status_pembayaran) {
             $transaksi->status_pembayaran = $request->status_pembayaran;
-            
-            // Jika ada catatan
-            if ($request->catatan) {
-                $transaksi->catatan = $request->catatan;
-            }
-            
             $transaksi->save();
-
-            // Jika status diubah menjadi Cancelled, kembalikan stok
-            if ($request->status_pembayaran == 'Cancelled') {
-                foreach ($transaksi->detailTransaksi as $detail) {
-                    $produk = $detail->produk;
-                    $produk->stok += $detail->kuantitas;
-                    $produk->save();
-                }
-            }
-
-            DB::commit();
-
-            return redirect()->route('admin.orders.show', $id)
-                ->with('success', 'Status pesanan berhasil diupdate!');
-                
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+
+        if ($request->status_pengiriman) {
+            $pengiriman = Pengiriman::where('id_transaksi', $id)->first();
+            if ($pengiriman) {
+                $pengiriman->status_pengiriman = $request->status_pengiriman;
+                $pengiriman->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'Status berhasil diperbarui!');
     }
 
-    /**
-     * Print invoice
-     */
-    public function print($id)
+    public function destroy($id)
     {
-        $transaksi = Transaksi::with(['pelanggan', 'detailTransaksi.produk'])
-            ->findOrFail($id);
-            
-        return view('admin.orders.print', compact('transaksi'));
+        $transaksi = Transaksi::findOrFail($id);
+        $transaksi->detailTransaksi()->delete();
+        $transaksi->pengiriman()->delete();
+        $transaksi->delete();
+
+        return redirect()->back()->with('success', 'Pesanan berhasil dihapus.');
     }
 
-    /**
-     * Get order data for viewing details
-     */
-    public function viewDetails($id)
+    public function bulkDestroy(Request $request)
     {
-        $transaksi = Transaksi::with(['pelanggan', 'detailTransaksi.produk'])
-            ->findOrFail($id);
+        $ids = $request->ids; // Menerima array ID dari Javascript
+
+        if ($ids && count($ids) > 0) {
+            Transaksi::whereIn('id_transaksi', $ids)->delete();
             
-        return response()->json([
-            'success' => true,
-            'data' => $transaksi
-        ]);
+            return response()->json(['status' => 'success', 'message' => 'Pesanan terpilih berhasil dihapus.']);
+        }
+
+        return response()->json(['status' => 'error', 'message' => 'Tidak ada pesanan yang dipilih.']);
     }
 }

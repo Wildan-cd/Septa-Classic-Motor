@@ -37,18 +37,37 @@
         
         <div class="products-grid">
             @foreach($topProducts as $product)
-            <div class="product-card">
+            {{-- Tambahkan onclick agar bisa diklik ke detail --}}
+            <div class="product-card" onclick="window.location.href='{{ route('product.detail', $product->id_produk) }}'" style="cursor: pointer;">
+                
                 <div class="product-image">
-                    <img src="{{ asset($product['image']) }}" alt="{{ $product['name'] }}">
+                    {{-- Logika Gambar Aman (Cek File Exists) --}}
+                    @if($product->gambar && file_exists(public_path($product->gambar)))
+                        <img src="{{ asset($product->gambar) }}" 
+                             alt="{{ $product->nama_produk }}">
+                    @else
+                        {{-- Gambar Placeholder jika kosong --}}
+                        <img src="https://via.placeholder.com/300x300?text=No+Image" 
+                             alt="{{ $product->nama_produk }}">
+                    @endif
                 </div>
+
                 <div class="product-info">
-                    <h3 class="product-name">{{ $product['name'] }}</h3>
+                    {{-- Nama Produk --}}
+                    <h3 class="product-name">{{ $product->nama_produk }}</h3>
+                    
                     <div class="product-price">
-                        <span class="price-current">Rp. {{ number_format($product['price'], 0, ',', '.') }}</span>
-                        @if(isset($product['old_price']))
-                        <span class="price-old">{{ number_format($product['old_price'], 0, ',', '.') }}</span>
-                        <span class="discount">-{{ $product['discount'] }}%</span>
-                        @endif
+                        {{-- Harga Asli --}}
+                        <span class="price-current">Rp. {{ number_format($product->harga, 0, ',', '.') }}</span>
+                        
+                        {{-- Bagian Diskon (Opsional: Hanya muncul jika Anda punya kolom harga_coret/diskon di DB) --}}
+                        {{-- Karena di model sebelumnya belum ada, saya comment dulu agar tidak error --}}
+                        {{-- 
+                        @if(isset($product->harga_coret) && $product->harga_coret > $product->harga)
+                            <span class="price-old">{{ number_format($product->harga_coret, 0, ',', '.') }}</span>
+                            <span class="discount">Sale</span>
+                        @endif 
+                        --}}
                     </div>
                 </div>
             </div>

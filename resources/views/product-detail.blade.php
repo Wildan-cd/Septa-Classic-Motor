@@ -33,8 +33,8 @@
                 {{-- Thumbnail List --}}
                 <div class="gallery-thumbnails">
                     @if($product->gambar)
-                        <div class="thumbnail active" onclick="changeMainImage('{{ asset('storage/' . $product->gambar) }}', this)">
-                            <img src="{{ asset('storage/' . $product->gambar) }}" alt="Thumbnail 1">
+                        <div class="thumbnail active" onclick="changeMainImage('{{ asset($product->gambar) }}', this)">
+                            <img src="{{ asset($product->gambar) }}" alt="Thumbnail 1">
                         </div>
                     @else
                         <div class="thumbnail active" onclick="changeMainImage('{{ asset('images/placeholder.jpg') }}', this)">
@@ -42,18 +42,18 @@
                         </div>
                     @endif
                     {{-- Placeholder for more images --}}
-                    <div class="thumbnail" onclick="changeMainImage('{{ asset('images/placeholder.jpg') }}', this)">
+                    {{-- <div class="thumbnail" onclick="changeMainImage('{{ asset('images/placeholder.jpg') }}', this)">
                         <img src="{{ asset('images/placeholder.jpg') }}" alt="Thumbnail 2">
                     </div>
                     <div class="thumbnail" onclick="changeMainImage('{{ asset('images/placeholder.jpg') }}', this)">
                         <img src="{{ asset('images/placeholder.jpg') }}" alt="Thumbnail 3">
-                    </div>
+                    </div> --}}
                 </div>
                 
                 {{-- Main Image --}}
                 <div class="gallery-main">
                     @if($product->gambar)
-                    <img src="{{ asset('storage/' . $product->gambar) }}" alt="{{ $product->nama_produk }}" id="mainProductImage">
+                    <img src="{{ asset($product->gambar) }}" alt="{{ $product->nama_produk }}" id="mainProductImage">
                     @else
                     <img src="{{ asset('images/placeholder.jpg') }}" alt="{{ $product->nama_produk }}" id="mainProductImage">
                     @endif
@@ -78,24 +78,46 @@
                 
                 {{-- Quantity & Add to Cart --}}
                 <div class="product-actions-new">
-                    <div class="quantity-control">
-                        <button type="button" class="qty-decrease" onclick="decreaseQty()">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                        </button>
-                        <input type="number" id="productQty" value="1" min="1" max="{{ $product->stok }}" readonly>
-                        <button type="button" class="qty-increase" onclick="increaseQty()">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                        </button>
-                    </div>
                     
-                    <button class="btn-add-to-cart" onclick="addToCart({{ $product->id_produk }})">
-                        Add to Cart
-                    </button>
+                    {{-- LOGIKA STOK: Jika Stok > 0, Tampilkan Tombol --}}
+                    @if($product->stok > 0)
+                        <div class="quantity-control">
+                            <button type="button" class="qty-decrease" onclick="decreaseQty()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                            {{-- Batasi max input sesuai stok --}}
+                            <input type="number" id="productQty" value="1" min="1" max="{{ $product->stok }}" readonly>
+                            <button type="button" class="qty-increase" onclick="increaseQty()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <button class="btn-add-to-cart" onclick="addToCart({{ $product->id_produk }})">
+                            Add to Cart
+                        </button>
+
+                    @else
+                        {{-- JIKA STOK HABIS (0) --}}
+                        <div class="out-of-stock-msg" style="width: 100%;">
+                            <button class="btn-disabled" disabled style="
+                                width: 100%;
+                                padding: 15px;
+                                background-color: #ccc;
+                                color: #666;
+                                border: 1px solid #999;
+                                cursor: not-allowed;
+                                font-weight: bold;
+                                border-radius: 8px;">
+                                STOK HABIS
+                            </button>
+                        </div>
+                    @endif
+
                 </div>
             </div>
         </div>
@@ -171,92 +193,105 @@
 
 @push('scripts')
 <script>
-    const maxStock = {{ $product->stok }};
-    
-    function changeMainImage(imageSrc, thumbnail) {
-        document.getElementById('mainProductImage').src = imageSrc;
-        
-        // Update active thumbnail
-        document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-        thumbnail.classList.add('active');
-    }
-    
+    window.maxStock = {{ $product->stok ?? 0 }};
+    console.log("Stok Produk Aktif:", window.maxStock);
+
     function increaseQty() {
         const input = document.getElementById('productQty');
-        let value = parseInt(input.value);
-        if (value < maxStock) {
-            input.value = value + 1;
+        let currentValue = parseInt(input.value) || 0; 
+
+        if (currentValue < window.maxStock) {
+            input.value = currentValue + 1;
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Batas Stok',
+                text: 'Maksimal pembelian adalah ' + window.maxStock + ' item',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
         }
     }
-    
+
     function decreaseQty() {
         const input = document.getElementById('productQty');
-        let value = parseInt(input.value);
-        if (value > 1) {
-            input.value = value - 1;
+        let currentValue = parseInt(input.value) || 1;
+
+        if (currentValue > 1) {
+            input.value = currentValue - 1;
         }
     }
-    
+
     function addToCart(productId) {
+        const qtyInput = document.getElementById('productQty');
+        const qtyVal = qtyInput ? parseInt(qtyInput.value) : 1;
+
+        if (window.maxStock <= 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Stok Habis',
+                text: 'Maaf, produk ini sedang tidak tersedia.'
+            });
+            return; 
+        }
+
+        if (qtyVal > window.maxStock) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Stok Kurang',
+                text: 'Anda meminta ' + qtyVal + ', tapi stok hanya ' + window.maxStock
+            });
+            return; 
+        }
+
+        Swal.fire({
+            title: 'Memproses...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
         fetch("{{ route('cart.add') }}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify({
                 id_produk: productId,
-                qty: 1
+                quantity: qtyVal
             })
         })
-        .then(response => {
-            if (response.status === 401) {
-                // Unauthorized - belum login
-                return response.json().then(data => {
-                    alert(data.message);
-                    window.location.href = data.redirect;
-                    throw new Error('Unauthorized');
-                });
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Terjadi kesalahan server');
             }
-            return response.json();
+            return data;
         })
         .then(data => {
             if(data.status === 'success') {
-                alert(data.message);
-                // Update cart count jika ada
-                updateCartCount(data.cart_count);
-            } else if(data.status === 'error') {
-                alert(data.message);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: data.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } else {
+                throw new Error(data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            if(error.message !== 'Unauthorized') {
-                alert('Terjadi kesalahan!');
-            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: error.message
+            });
         });
-    }
-
-    function updateCartCount(count) {
-        const cartBadge = document.querySelector('.cart-count');
-        if(cartBadge) {
-            cartBadge.textContent = count;
-        }
-    }
-    
-    function openTab(evt, tabName) {
-        const tabContent = document.getElementsByClassName("tab-content");
-        for (let i = 0; i < tabContent.length; i++) {
-            tabContent[i].classList.remove('active');
-        }
-        
-        const tabBtn = document.getElementsByClassName("tab-btn");
-        for (let i = 0; i < tabBtn.length; i++) {
-            tabBtn[i].classList.remove('active');
-        }
-        
-        document.getElementById(tabName).classList.add('active');
-        evt.currentTarget.classList.add('active');
     }
 </script>
 @endpush

@@ -30,4 +30,9 @@ class DetailTransaksi extends Model
     {
         return $this->belongsTo(Produk::class, 'id_produk', 'id_produk');
     }
+
+    public function getKuantitasAttribute()
+    {
+        return $this->jumlah;
+    }
 }

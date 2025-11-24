@@ -16,6 +16,9 @@
     
     {{-- Chart.js for graphs --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="admin-body">
     @include('partials.admin-header')
@@ -23,7 +26,7 @@
     <main class="admin-main">
         @yield('content')
     </main>
-    
+
     {{-- Admin JavaScript --}}
     <script src="{{ asset('js/admin.js') }}"></script>
     

@@ -11,7 +11,6 @@ class CatalogController extends Controller
     {
         $query = Produk::query();
         
-        // Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -20,25 +19,21 @@ class CatalogController extends Controller
             });
         }
         
-        // Category filter
-        if ($request->filled('kategori')) {
-            $query->where('kategori', $request->kategori);
+        if ($request->filled('category')) {
+            $query->where('kategori', $request->category);
         }
         
-        // Price filter
         if ($request->filled('price')) {
             $priceRange = explode('-', $request->price);
             if (count($priceRange) == 2) {
                 $query->whereBetween('harga', [(int)$priceRange[0], (int)$priceRange[1]]);
             }
         }
-        
-        // Stock filter
+
         if ($request->filled('in_stock') && $request->in_stock == '1') {
             $query->where('stok', '>', 0);
         }
-        
-        // Sorting
+
         $sort = $request->get('sort', 'newest');
         switch ($sort) {
             case 'name_asc':
@@ -59,14 +54,11 @@ class CatalogController extends Controller
                 break;
         }
         
-        // Get unique categories for filter
         $categories = Produk::select('kategori')
+            ->whereNotNull('kategori') 
             ->distinct()
-            ->pluck('kategori')
-            ->filter()
-            ->values();
-        
-        // Paginate results
+            ->pluck('kategori');
+
         $products = $query->paginate(12)->withQueryString();
         
         return view('catalog', compact('products', 'categories'));
@@ -75,10 +67,9 @@ class CatalogController extends Controller
     public function show($id)
     {
         $product = Produk::findOrFail($id);
-        
-        // Get related products (same category)
+
         $relatedProducts = Produk::where('kategori', $product->kategori)
-            ->where('id_produk', '!=', $product->id_produk)
+            ->where('id_produk', '!=', $product->id_produk) // Ganti id_produk sesuai primary key model
             ->where('stok', '>', 0)
             ->limit(4)
             ->get();

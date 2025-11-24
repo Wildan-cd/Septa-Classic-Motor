@@ -3,37 +3,36 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Produk;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $topProducts = [
-            [
-                'id' => 1,
-                'name' => 'Nama Produk',
-                'image' => 'images/products/product1.jpg',
-                'price' => 5000,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Nama Produk',
-                'image' => 'images/products/product2.jpg',
-                'price' => 10000
-            ],
-            [
-                'id' => 3,
-                'name' => 'Nama Produk',
-                'image' => 'images/products/product3.jpg',
-                'price' => 50000
-            ],
-            [
-                'id' => 4,
-                'name' => 'Nama Produk',
-                'image' => 'images/products/product4.jpg',
-                'price' => 150000
-            ],
-        ];
+        $topProducts = Produk::select(
+                        'produk.*',
+                        DB::raw('SUM(detail_transaksi.jumlah) as total_sales')
+                    )
+                    ->join('detail_transaksi', 'produk.id_produk', '=', 'detail_transaksi.id_produk')
+                    ->join('transaksi', 'detail_transaksi.id_transaksi', '=', 'transaksi.id_transaksi')
+                    ->where('transaksi.status_pembayaran', 'Lunas')
+                    ->groupBy(
+                        'produk.id_produk', 
+                        'produk.nama_produk', 
+                        'produk.harga', 
+                        'produk.gambar', 
+                        'produk.stok', 
+                        'produk.keterangan',
+                        'produk.kategori',
+                    )
+                    ->orderByDesc('total_sales')
+                    ->take(4) 
+                    ->get();
+
+                if ($topProducts->isEmpty()) {
+                    $topProducts = Produk::latest()->take(4)->get();
+                }
 
         $categories = [
             [
@@ -53,7 +52,7 @@ class HomeController extends Controller
             ],
             [
                 'name' => 'Other',
-                'slug' => 'other',
+                'slug' => '',
                 'image' => 'images/categories/other.jpg'
             ],
         ];
